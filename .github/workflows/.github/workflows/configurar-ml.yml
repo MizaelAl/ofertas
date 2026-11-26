@@ -1,0 +1,26 @@
+name: Configurar Mercado Livre
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "Código que apareceu no endereço depois de autorizar (parte depois de code=)"
+        required: true
+
+jobs:
+  configurar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pynacl
+      - name: Trocar código pelo token
+        env:
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+          ML_REDIRECT_URI: https://www.google.com
+          GH_PAT: ${{ secrets.GH_PAT }}
+          CODE: ${{ inputs.code }}
+        run: python scripts/fetch_offers.py --ml-setup "$CODE"
