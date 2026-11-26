@@ -1,0 +1,9 @@
+{
+ "updated_at": "2026-11-26T16:42-03:00",
+ "shopee": [],
+ "ml": [],
+ "errors": [
+  "Shopee: Faltam os secrets SHOPEE_APP_ID / SHOPEE_SECRET",
+  "Mercado Livre: Faltam ML_CLIENT_ID / ML_CLIENT_SECRET / ML_REFRESH_TOKEN (rode o workflow 'Configurar Mercado Livre')"
+ ]
+}
