@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ofertas">
+<meta name="theme-color" content="#111214">
+<title>Ofertas do dia</title>
+<style>
+  :root {
+    --bg: #f4f2ee; --card: #ffffff; --ink: #1b1b1d; --muted: #6d6a66; --line: #e4e0da;
+    --shopee: #ee4d2d; --ml: #2d3277; --ml-y: #ffe600; --wa: #1fa855; --accent: #ee4d2d;
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111214; --card: #1c1d20; --ink: #f1efea; --muted: #9a968f; --line: #2c2d31; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  header { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px; border-bottom: 1px solid var(--line); }
+  .top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  h1 { font-size: 24px; letter-spacing: -0.02em; margin: 0; }
+  #updated { color: var(--muted); font-size: 12px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;
+    background: var(--line); padding: 4px; border-radius: 12px; }
+  .tabs button { border: 0; padding: 8px; border-radius: 9px; background: transparent; color: var(--ink);
+    font: 600 14px/1 inherit; font-family: inherit; }
+  .tabs button.on { background: var(--card); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+  .tabs button[data-src="shopee"].on { color: var(--shopee); }
+  .tabs button[data-src="ml"].on { color: var(--ml); }
+  @media (prefers-color-scheme: dark) { .tabs button[data-src="ml"].on { color: var(--ml-y); } }
+  .bar { display: flex; gap: 6px; overflow-x: auto; margin-top: 10px; scrollbar-width: none; }
+  .bar::-webkit-scrollbar { display: none; }
+  .chip, select { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    padding: 6px 12px; border-radius: 999px; font: 500 13px/1.2 inherit; font-family: inherit; }
+  .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  main { padding: 12px 16px; display: grid; gap: 12px; max-width: 640px; margin: 0 auto; }
+  .alert { background: #fff4d6; color: #6b4b00; border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+  @media (prefers-color-scheme: dark) { .alert { background: #3a2f12; color: #f3d98b; } }
+  .card { background: var(--card); border-radius: var(--radius); padding: 12px; display: grid;
+    grid-template-columns: 92px 1fr; gap: 12px; border: 1px solid var(--line); }
+  .card.sent { opacity: .55; }
+  .card img { width: 92px; height: 92px; object-fit: contain; border-radius: 10px; background: #fff; }
+  .title { font-weight: 600; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .price { margin-top: 6px; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  .price b { font-size: 18px; letter-spacing: -0.01em; }
+  .price s { color: var(--muted); font-size: 12px; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
+  .off { background: #e5f6ea; color: #137a3a; }
+  .com { background: #fde8e3; color: #b8321a; }
+  @media (prefers-color-scheme: dark) { .off { background: #173b24; color: #7fdc9f; } .com { background: #431d15; color: #ff9b83; } }
+  .actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .btn { flex: 1; border: 0; border-radius: 12px; padding: 11px 10px; font: 600 14px/1 inherit; font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+  .wa { background: var(--wa); color: #fff; }
+  .ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); flex: 0 0 auto; padding-inline: 14px; }
+  .btn:disabled { opacity: .4; }
+  .mllink { grid-column: 1 / -1; display: grid; gap: 6px; }
+  .mllink .row { display: flex; gap: 6px; }
+  .mllink input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    border-radius: 10px; padding: 9px 10px; font: 14px inherit; font-family: inherit; }
+  .hint { font-size: 12px; color: var(--muted); }
+  .hint a { color: inherit; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+  dialog { border: 0; border-radius: 18px; padding: 16px; width: min(92vw, 520px); background: var(--card); color: var(--ink); }
+  dialog::backdrop { background: rgb(0 0 0 / .45); }
+  dialog textarea { width: 100%; min-height: 170px; border: 1px solid var(--line); border-radius: 10px; padding: 10px;
+    background: var(--bg); color: var(--ink); font: 14px/1.4 ui-monospace, Menlo, monospace; }
+  dialog h2 { margin: 0 0 6px; font-size: 18px; }
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 14px;
+    opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>Ofertas do dia</h1>
+    <span id="updated">carregando…</span>
+  </div>
+  <div class="tabs">
+    <button data-src="shopee" class="on">Shopee</button>
+    <button data-src="ml">Mercado Livre</button>
+  </div>
+  <div class="bar" id="filters"></div>
+</header>
+<main id="list"></main>
+
+<dialog id="tpl">
+  <h2>Modelo da mensagem</h2>
+  <p class="hint">Use {titulo}, {preco}, {de}, {desconto} e {link}. *negrito* e ~riscado~ funcionam no WhatsApp.</p>
+  <textarea id="tplText"></textarea>
+  <div class="actions" style="margin-top:10px">
+    <button class="btn ghost" id="tplReset">Padrão</button>
+    <button class="btn wa" id="tplSave">Salvar</button>
+  </div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_TPL = "🔥 *{titulo}*\n\n{de}💰 Por apenas *{preco}* {desconto}\n\n🛒 Compre aqui: {link}";
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const state = {
+  data: { shopee: [], ml: [], errors: [] },
+  src: "shopee", cat: "Todas", sort: "rank", hideSent: false,
+  sent: store.get("sent", {}), mlLinks: store.get("mlLinks", {}), tpl: store.get("tpl", DEFAULT_TPL)
+};
+const brl = v => v == null ? "" : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const today = () => new Date().toISOString().slice(0, 10);
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+function shortTitle(t) {
+  t = t.replace(/\s+/g, " ").trim();
+  return t.length > 90 ? t.slice(0, 87).trimEnd() + "…" : t;
+}
+
+function linkFor(o) { return o.source === "shopee" ? o.link : state.mlLinks[o.id]; }
+
+function message(o) {
+  return state.tpl
+    .replaceAll("{titulo}", shortTitle(o.title))
+    .replaceAll("{preco}", brl(o.price))
+    .replaceAll("{de}", o.old_price ? `~De ${brl(o.old_price)}~\n` : "")
+    .replaceAll("{desconto}", o.discount ? `(-${o.discount}%)` : "")
+    .replaceAll("{link}", linkFor(o) || "")
+    .replace(/[ \t]+\n/g, "\n").trim();
+}
+
+function markSent(o) {
+  state.sent[o.id] = today(); store.set("sent", state.sent);
+}
+
+function items() {
+  let list = [...(state.data[state.src] || [])].map((o, i) => ({ ...o, _i: i }));
+  if (state.cat !== "Todas") list = list.filter(o => o.category === state.cat);
+  if (state.hideSent) list = list.filter(o => !state.sent[o.id]);
+  const by = {
+    rank: (a, b) => a._i - b._i,
+    com: (a, b) => (b.commission_value ?? b.commission_rate ?? 0) - (a.commission_value ?? a.commission_rate ?? 0),
+    off: (a, b) => (b.discount ?? 0) - (a.discount ?? 0),
+    price: (a, b) => (a.price ?? 1e9) - (b.price ?? 1e9),
+  }[state.sort];
+  return list.sort(by);
+}
+
+function renderFilters() {
+  const cats = ["Todas", ...new Set((state.data[state.src] || []).map(o => o.category))];
+  if (!cats.includes(state.cat)) state.cat = "Todas";
+  const f = document.getElementById("filters");
+  const sortOpts = [["rank","Mais vendidos"],["off","Maior desconto"],["price","Menor preço"]];
+  if (state.src === "shopee") sortOpts.splice(1, 0, ["com","Maior comissão"]);
+  if (!sortOpts.some(s => s[0] === state.sort)) state.sort = "rank";
+  f.innerHTML =
+    `<select id="sort" aria-label="Ordenar">${sortOpts.map(([v,l]) =>
+      `<option value="${v}" ${v===state.sort?"selected":""}>${l}</option>`).join("")}</select>` +
+    `<button class="chip ${state.hideSent?"on":""}" id="hide">Ocultar enviados</button>` +
+    `<button class="chip" id="edit">✎ Mensagem</button>` +
+    cats.map(c => `<button class="chip cat ${c===state.cat?"on":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+}
+
+function card(o) {
+  const sent = state.sent[o.id];
+  const link = linkFor(o);
+  const tags = [
+    o.discount ? `<span class="tag off">-${o.discount}%</span>` : "",
+    o.commission_rate ? `<span class="tag com">${o.commission_rate}% comissão${o.commission_value ? " · " + brl(o.commission_value) : ""}</span>` : ""
+  ].join("");
+  const meta = [o.category, o.sales ? `${o.sales.toLocaleString("pt-BR")} vendidos` : "",
+                o.rank ? `#${o.rank} na categoria` : "", sent ? `✓ enviado ${sent.split("-").reverse().slice(0,2).join("/")}` : ""]
+               .filter(Boolean).join(" · ");
+  const mlBox = o.source === "ml" ? `
+    <div class="mllink">
+      <div class="row">
+        <input type="url" inputmode="url" placeholder="Cole aqui seu link de afiliado" value="${esc(link || "")}" data-ml="${esc(o.id)}">
+        <button class="btn ghost" data-save="${esc(o.id)}">Salvar</button>
+      </div>
+      ${link ? "" : `<span class="hint">Abra o <a href="${esc(o.product_url)}" target="_blank" rel="noopener">produto</a>, toque em Compartilhar → link de afiliado e cole aqui.</span>`}
+    </div>` : "";
+  return `
+  <article class="card ${sent ? "sent" : ""}">
+    <img src="${esc(o.image || "")}" alt="" loading="lazy" referrerpolicy="no-referrer">
+    <div>
+      <div class="title">${esc(o.title)}</div>
+      <div class="meta">${esc(meta)}</div>
+      <div class="price"><b>${brl(o.price)}</b>${o.old_price ? `<s>${brl(o.old_price)}</s>` : ""}${tags}</div>
+    </div>
+    ${mlBox}
+    <div class="actions">
+      <button class="btn wa" data-wa="${esc(o.id)}" ${link ? "" : "disabled"}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg>
+        Enviar no WhatsApp</button>
+      <button class="btn ghost" data-copy="${esc(o.id)}" ${link ? "" : "disabled"} aria-label="Copiar mensagem">Copiar</button>
+    </div>
+  </article>`;
+}
+
+function render() {
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.src === state.src));
+  renderFilters();
+  const list = items();
+  const errs = (state.data.errors || []).filter(e =>
+    state.src === "shopee" ? e.startsWith("Shopee") : e.startsWith("Mercado Livre") || e.startsWith("ML"));
+  document.getElementById("list").innerHTML =
+    errs.map(e => `<div class="alert">⚠️ ${esc(e)}</div>`).join("") +
+    (list.length ? list.map(card).join("") : `<div class="empty">Nenhuma oferta aqui ainda.</div>`);
+}
+
+function find(id) { return [...state.data.shopee, ...state.data.ml].find(o => o.id === id); }
+
+document.addEventListener("click", async e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.src) { state.src = t.dataset.src; render(); scrollTo(0, 0); return; }
+  if (t.dataset.cat) { state.cat = t.dataset.cat; render(); return; }
+  if (t.id === "hide") { state.hideSent = !state.hideSent; render(); return; }
+  if (t.id === "edit") { document.getElementById("tplText").value = state.tpl; document.getElementById("tpl").showModal(); return; }
+  if (t.id === "tplSave") { state.tpl = document.getElementById("tplText").value || DEFAULT_TPL; store.set("tpl", state.tpl); document.getElementById("tpl").close(); toast("Modelo salvo"); return; }
+  if (t.id === "tplReset") { document.getElementById("tplText").value = DEFAULT_TPL; return; }
+  if (t.dataset.save) {
+    const input = document.querySelector(`input[data-ml="${CSS.escape(t.dataset.save)}"]`);
+    const v = input.value.trim();
+    if (v && !/^https:\/\/([a-z0-9-]+\.)*(mercadolivre\.com(\.br)?|mercadolibre\.com|meli\.la)\//i.test(v)) {
+      toast("Esse não parece um link do Mercado Livre"); return;
+    }
+    if (v) state.mlLinks[t.dataset.save] = v; else delete state.mlLinks[t.dataset.save];
+    store.set("mlLinks", state.mlLinks); render(); toast(v ? "Link salvo" : "Link removido"); return;
+  }
+  const id = t.dataset.wa || t.dataset.copy; if (!id) return;
+  const o = find(id); if (!o || !linkFor(o)) return;
+  const text = message(o);
+  if (t.dataset.copy) {
+    try { await navigator.clipboard.writeText(text); toast("Mensagem copiada"); }
+    catch { prompt("Copie a mensagem:", text); }
+  } else {
+    location.href = "https://wa.me/?text=" + encodeURIComponent(text);
+  }
+  markSent(o); setTimeout(render, 300);
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "sort") { state.sort = e.target.value; render(); }
+});
+
+async function load() {
+  try {
+    const r = await fetch("offers.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    state.data = Object.assign({ shopee: [], ml: [], errors: [] }, await r.json());
+    const d = state.data.updated_at ? new Date(state.data.updated_at) : null;
+    document.getElementById("updated").textContent = d
+      ? "atualizado " + d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+      : "";
+  } catch (err) {
+    document.getElementById("updated").textContent = "sem dados ainda";
+    state.data.errors = ["Shopee: não achei offers.json. Rode o workflow 'Buscar ofertas' uma vez.",
+                         "Mercado Livre: não achei offers.json. Rode o workflow 'Buscar ofertas' uma vez."];
+  }
+  render();
+}
+load();
+</script>
+</body>
+</html>

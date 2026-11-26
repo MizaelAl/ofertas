@@ -1,0 +1,25 @@
+{
+  "shopee": {
+    "_comentario": "sortType: 2 = mais vendidos, 5 = maior comissão. Palavras-chave vazias = ranking geral.",
+    "ativo": true,
+    "sortType": 2,
+    "por_busca": 30,
+    "palavras_chave": ["", "fritadeira", "fone bluetooth", "organizador", "skincare"],
+    "comissao_minima_pct": 0
+  },
+  "mercadolivre": {
+    "_comentario": "Categorias do Mercado Livre Brasil (IDs MLB). Remova as que não interessam.",
+    "ativo": true,
+    "por_categoria": 10,
+    "categorias": {
+      "MLB1051": "Celulares e Telefones",
+      "MLB1000": "Eletrônicos, Áudio e Vídeo",
+      "MLB1648": "Informática",
+      "MLB5726": "Eletrodomésticos",
+      "MLB1574": "Casa, Móveis e Decoração",
+      "MLB1246": "Beleza e Cuidado Pessoal",
+      "MLB1276": "Esportes e Fitness",
+      "MLB1132": "Brinquedos e Hobbies"
+    }
+  }
+}
