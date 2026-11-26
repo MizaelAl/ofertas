@@ -1,0 +1,40 @@
+name: Buscar ofertas
+
+on:
+  schedule:
+    - cron: "17 10,14,20 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ofertas
+  cancel-in-progress: false
+
+jobs:
+  buscar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pynacl
+      - name: Buscar mais vendidos
+        env:
+          SHOPEE_APP_ID: ${{ secrets.SHOPEE_APP_ID }}
+          SHOPEE_SECRET: ${{ secrets.SHOPEE_SECRET }}
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+          ML_REFRESH_TOKEN: ${{ secrets.ML_REFRESH_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: python scripts/fetch_offers.py
+      - name: Salvar ofertas
+        if: always()
+        run: |
+          git config user.name "ofertas-bot"
+          git config user.email "ofertas-bot@users.noreply.github.com"
+          git add docs/offers.json
+          git diff --cached --quiet || git commit -m "Ofertas atualizadas"
+          git push
